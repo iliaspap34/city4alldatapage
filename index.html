@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Δεδομένα City4ALL. Εξερευνήστε τα δεδομένα και τα στατιστικά του City4ALL.">
+<title>Δεδομένα City4ALL</title>
+<style>
+:root{
+  --bg0:#061a33; --bg1:#0a2850; --bg2:#0d3a6e;
+  --cyan:#46d39a; --blue:#3d8bff; --ice:#d6ebff; --amber:#ffffff;
+  --text:#ffffff; --muted:#b3cbe8;
+  --line:rgba(120,170,255,.24);
+  --mx:.5; --my:.5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg0)}
+body{
+  font-family:"Inter","SF Pro Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  color:var(--text);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ───────── Hero container ───────── */
+.hero{
+  position:relative;height:100%;min-height:200px;overflow:hidden;isolation:isolate;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+  gap:clamp(16px,3vw,40px);
+  padding:clamp(16px,3vh,34px) clamp(18px,4.5vw,64px);
+  background:
+    radial-gradient(120% 150% at 88% -10%, #12437f 0%, rgba(18,67,127,0) 58%),
+    radial-gradient(80% 120% at 0% 110%, #0b3566 0%, rgba(11,53,102,0) 62%),
+    linear-gradient(180deg,var(--bg1),var(--bg0));
+}
+.hero::before{ /* hairline top highlight */
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;z-index:5;
+  background:linear-gradient(90deg,transparent,rgba(130,190,255,.35) 30%,rgba(70,211,154,.5) 70%,transparent);
+}
+.scene{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
+.sheen{
+  position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;
+  background:linear-gradient(100deg,transparent 42%,rgba(150,210,255,.07) 50%,transparent 58%);
+  background-size:260% 100%;background-position:120% 0;
+}
+.glow{
+  position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity .5s;
+  background:radial-gradient(240px circle at calc(var(--mx)*100%) calc(var(--my)*100%),rgba(70,211,154,.15),transparent 70%);
+}
+.hero:hover .glow{opacity:1}
+.scrim{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(6,26,51,.95) 0%,rgba(6,26,51,.84) 28%,rgba(6,26,51,.38) 56%,rgba(6,26,51,0) 80%),
+    linear-gradient(180deg,rgba(6,26,51,.35),rgba(6,26,51,0) 24%,rgba(6,26,51,0) 76%,rgba(6,26,51,.55));
+}
+.rail{position:absolute;left:0;right:0;bottom:0;height:1px;z-index:5;pointer-events:none;opacity:.5;
+  background:linear-gradient(90deg,transparent 0%,rgba(76,141,255,.35) 40%,rgba(70,211,154,.95) 85%,rgba(70,211,154,.4) 100%)}
+.rail i{position:absolute;bottom:0;left:0;width:22%;height:2px;
+  background:linear-gradient(90deg,transparent,#a6f0cf,transparent);transform:translateX(-100%)}
+
+/* ───── Copy ───── */
+.copy{position:relative;z-index:4;max-width:600px;
+  transform:translate(calc((var(--mx) - .5)*5px),calc((var(--my) - .5)*3px))}
+.eyebrow{display:flex;align-items:center;gap:10px;
+  font-size:clamp(9.5px,1.05vw,11.5px);font-weight:600;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase}
+.dot{flex:none;width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px rgba(70,211,154,.8)}
+h1{margin-top:clamp(8px,1.6vh,14px);
+  font-size:clamp(28px,3.4vw + 6px,48px);line-height:1.05;font-weight:650;letter-spacing:-.022em;
+  text-shadow:0 2px 26px rgba(6,26,51,.7)}
+.hl{background:linear-gradient(95deg,#7ae8b9,#5aa2ff 58%,#9cc9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{margin-top:clamp(8px,1.4vh,12px);max-width:54ch;font-size:clamp(13px,1.3vw,16.5px);line-height:1.5;color:var(--muted)}
+
+/* ───── Metrics (glass) ───── */
+.metrics{position:relative;z-index:4;list-style:none;display:flex;flex-direction:column;gap:10px;
+  transform:translate(calc((var(--mx) - .5)*-7px),calc((var(--my) - .5)*-4px))}
+.metric{position:relative;display:flex;align-items:center;gap:12px;min-width:236px;padding:10px 16px 10px 12px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(40,105,200,.30),rgba(8,36,72,.58));
+  border:1px solid var(--line);
+  box-shadow:0 12px 30px -14px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.09);
+  -webkit-backdrop-filter:blur(9px) saturate(1.25);backdrop-filter:blur(9px) saturate(1.25);overflow:hidden}
+.metric-icon{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(70,211,154,.10);border:1px solid rgba(70,211,154,.28);color:var(--cyan)}
+.metric-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.metric-text{display:block;min-width:0}
+.metric-value{display:block;font-size:19px;font-weight:650;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:#fff;margin-bottom:2px}
+.metric-label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;overflow-wrap:anywhere}
+.metric .bar{position:absolute;left:14px;right:14px;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);background-size:45% 100%;background-repeat:no-repeat;background-position:-60% 0;opacity:.9}
+
+.metric-arrow{flex:none;margin-left:auto;width:16px;height:16px;fill:none;stroke:var(--cyan);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.metric-label{letter-spacing:.12em}
+
+/* ───── SVG scene styling ───── */
+.road{fill:none;stroke:rgba(96,146,255,.15);stroke-width:1}
+.road.major{stroke:rgba(120,175,255,.30);stroke-width:1.6}
+.orbit{fill:none;stroke:rgba(110,170,255,.12);stroke-width:1;stroke-dasharray:2 7}
+.park{fill:rgba(70,211,154,.045);stroke:rgba(70,211,154,.18);stroke-width:.8;stroke-dasharray:2 3}
+.park-dot{fill:rgba(70,211,154,.35)}
+.link{fill:none;stroke:rgba(70,211,154,.62);stroke-width:1.1;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0}
+.node-out{cursor:pointer;outline:none}
+.node-out .hit{fill:transparent;stroke:none;pointer-events:all}
+.node-out:focus-visible .hit{stroke:#a6f0cf;stroke-width:1.4;stroke-dasharray:3 2}
+.halo{fill:url(#gHalo);opacity:.75}
+.core{fill:var(--cyan)}
+.ring{fill:none;stroke:var(--cyan);stroke-width:1;opacity:0;transform-box:fill-box;transform-origin:center}
+.node-in{transform-box:fill-box;transform-origin:center}
+.type1 .core{fill:var(--amber)} .type1 .ring{stroke:var(--amber)} .type1 .halo{fill:url(#gHaloA)}
+.type2 .core{fill:#6fb0ff}      .type2 .ring{stroke:#6fb0ff}
+.sig-halo{fill:url(#gHalo);opacity:.85}
+.sig-core{fill:#f2fff9}
+.ping-ring{fill:none;stroke:var(--cyan);stroke-width:1;transform-box:fill-box;transform-origin:center;opacity:0}
+.ping-dot{fill:var(--cyan);transform-box:fill-box;transform-origin:center;opacity:0}
+.p-streak{stroke:#7ae8b9;stroke-width:.9;stroke-linecap:round;opacity:.6}
+.p-dot{fill:#d4f7e8}
+
+/* ───── Tooltip ───── */
+.tip{position:absolute;left:0;top:0;z-index:6;pointer-events:none;opacity:0;transition:opacity .15s ease;white-space:nowrap;
+  display:flex;align-items:center;gap:8px;padding:6px 11px;border-radius:9px;
+  font-size:11.5px;font-weight:500;letter-spacing:.02em;color:var(--ice);
+  background:rgba(7,28,58,.94);border:1px solid rgba(120,190,255,.38);box-shadow:0 8px 24px -8px rgba(0,0,0,.7)}
+.tip.on{opacity:1}
+.tip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px currentColor;color:var(--cyan)}
+.tip[data-type="1"]::before{background:var(--amber);color:var(--amber)}
+.tip[data-type="2"]::before{background:#6fb0ff;color:#6fb0ff}
+
+/* ───── Motion (only when the user hasn't asked for reduced motion) ───── */
+@media (prefers-reduced-motion:no-preference){
+  .metric-arrow{animation:bob 2.4s ease-in-out infinite;animation-delay:var(--k,0s)}
+  @keyframes bob{0%,100%{transform:translateY(-1px)}50%{transform:translateY(3px)}}
+  .rv{transition:opacity .85s ease var(--d,0ms),transform .95s cubic-bezier(.2,.7,.2,1) var(--d,0ms)}
+  .js .hero:not(.is-in) .rv{opacity:0;transform:translateY(12px)}
+  .fx{transition:opacity 1.1s ease var(--d,0ms),transform 1.1s cubic-bezier(.2,.7,.2,1) var(--d,0ms)}
+  .js .hero:not(.is-in) .fx{opacity:0}
+  .js .hero:not(.is-in) .bld{transform:translateY(5px)}
+  .node-in{transition:opacity .6s ease var(--d,0ms),transform .75s cubic-bezier(.3,1.6,.5,1) var(--d,0ms)}
+  .js .hero:not(.is-in) .node-in{opacity:0;transform:scale(.2)}
+  .link{transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1) var(--d,0ms)}
+  .js .hero:not(.is-in) .link{stroke-dashoffset:1}
+
+  .dot{animation:dotp 2.4s ease-out infinite}
+  .ring{animation:pulse 3.8s ease-out infinite;animation-delay:var(--pd,0s)}
+  .core{animation:twinkle 3.2s ease-in-out infinite;animation-delay:var(--pd,0s)}
+  .sheen{animation:sheen 10s ease-in-out infinite 2s}
+  .rail i{animation:railrun 5.5s linear infinite}
+  .metric .bar{animation:sweep 3.6s ease-in-out infinite;animation-delay:var(--k,0s)}
+  .ping-ring{animation:pingRing 2.4s ease-out forwards}
+  .ping-dot{animation:pingDot 2.4s ease-out forwards}
+  .hero.paused *,.hero.paused *::before,.hero.paused *::after{animation-play-state:paused!important}
+
+  @keyframes dotp{0%{box-shadow:0 0 0 0 rgba(70,211,154,.65)}80%,100%{box-shadow:0 0 0 9px rgba(70,211,154,0)}}
+  @keyframes pulse{0%{transform:scale(.7);opacity:0}12%{opacity:.75}100%{transform:scale(4.4);opacity:0}}
+  @keyframes twinkle{0%,100%{opacity:.78}50%{opacity:1}}
+  @keyframes sheen{0%{background-position:120% 0}55%,100%{background-position:-30% 0}}
+  @keyframes railrun{from{transform:translateX(-100%)}to{transform:translateX(460%)}}
+  @keyframes sweep{0%{background-position:-60% 0}60%,100%{background-position:160% 0}}
+  @keyframes pingRing{0%{transform:scale(.4);opacity:.9}100%{transform:scale(5.5);opacity:0}}
+  @keyframes pingDot{0%{transform:scale(.2);opacity:0}15%{transform:scale(1.4);opacity:1}60%{transform:scale(1);opacity:.9}100%{opacity:0}}
+}
+@media (prefers-reduced-motion:reduce){
+  .glow,.sheen{display:none}
+  .rail i{display:none}
+}
+@media (hover:none){.glow{display:none}}
+
+/* ───── Responsive ───── */
+@media (max-width:1000px){
+  .metric{min-width:204px}
+  .copy{max-width:520px}
+}
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;align-content:center;gap:12px;padding:16px 18px 18px}
+  .copy{max-width:none}
+  .eyebrow{letter-spacing:.15em}
+  .metrics{flex-direction:row;gap:8px;transform:none}
+  .metric{flex:1 1 0;min-width:0;flex-direction:column;align-items:flex-start;gap:6px;padding:8px 10px;border-radius:11px;
+    background:linear-gradient(135deg,rgba(40,105,200,.36),rgba(8,36,72,.7));
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .metric-arrow{display:none}
+  .metric-icon{width:22px;height:22px}
+  .metric-icon svg{width:12px;height:12px}
+  .metric-label{font-size:9.5px;letter-spacing:.08em;line-height:1.3}
+  .metric-value{font-size:15px}
+  .scrim{background:linear-gradient(180deg,rgba(6,26,51,.8),rgba(6,26,51,.56) 55%,rgba(6,26,51,.74))}
+  .copy{transform:none}
+}
+@media (max-width:760px) and (max-height:300px){.lede{display:none}}
+@media (max-height:230px) and (min-width:761px){.lede{display:none}}
+</style>
+</head>
+<body>
+<header class="hero" id="hero" aria-labelledby="hTitle">
+  <svg class="scene" id="scene" viewBox="0 0 1200 280" preserveAspectRatio="xMaxYMid slice" role="group" aria-label="Διακοσμητικός χάρτης δικτύου προσβασιμότητας" aria-describedby="sceneDesc" focusable="false">
+    <desc id="sceneDesc">Ενδεικτική απεικόνιση πόλης και δικτύου προσβασιμότητας. Δεν αποτελεί ζωντανά δεδομένα.</desc>
+    <defs>
+      <radialGradient id="gHalo"><stop offset="0" stop-color="#46d39a" stop-opacity=".6"/><stop offset="1" stop-color="#46d39a" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gHaloA"><stop offset="0" stop-color="#ffffff" stop-opacity=".6"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+      <filter id="blur3" x="-10%" y="-20%" width="120%" height="140%"><feGaussianBlur stdDeviation="2.6"/></filter>
+    </defs>
+    <g id="far" aria-hidden="true"><ellipse class="orbit" cx="880" cy="150" rx="340" ry="118"/><g id="roads"></g></g>
+    <g id="mid" aria-hidden="true"><g id="blds"></g></g>
+    <g id="near">
+      <g id="links" aria-hidden="true"></g>
+      <use href="#links" filter="url(#blur3)" opacity=".7" aria-hidden="true"/>
+      <g id="particles" aria-hidden="true"></g>
+      <g id="signals" class="fx" style="--d:1700ms" aria-hidden="true"></g>
+      <g id="nodes"></g>
+      <g id="pings" aria-hidden="true"></g>
+    </g>
+  </svg>
+  <div class="sheen" aria-hidden="true"></div>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="scrim" aria-hidden="true"></div>
+
+  <div class="copy">
+    <p class="eyebrow rv" style="--d:150ms"><span class="dot" aria-hidden="true"></span>City4All · Statistics</p>
+    <h1 id="hTitle" class="rv" style="--d:260ms">Δεδομένα <span class="hl">City4ALL</span></h1>
+    <p class="lede rv" style="--d:380ms">Εξερευνήστε τα δεδομένα και τα στατιστικά του City4ALL με τις επόμενες εφαρμογές χάρτη και dashboard.</p>
+  </div>
+
+  <ul class="metrics" aria-label="Επόμενες ενότητες της σελίδας">
+    <li class="metric rv" style="--d:900ms;--k:0s">
+      <span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 4L3 6.5v13L9 17l6 3 6-2.5v-13L15 7 9 4z"/><path d="M9 4v13M15 7v13"/></svg></span>
+      <span class="metric-text"><span class="metric-label">Εφαρμογή χάρτη</span></span>
+      <svg class="metric-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg><i class="bar" aria-hidden="true"></i>
+    </li>
+    <li class="metric rv" style="--d:1030ms;--k:1.2s">
+      <span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19v-6M11 19V6M17 19v-9M3 20.5h18"/></svg></span>
+      <span class="metric-text"><span class="metric-label">Dashboard στατιστικών</span></span>
+      <svg class="metric-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg><i class="bar" aria-hidden="true"></i>
+    </li>
+  </ul>
+
+  <div class="rail" id="rail" aria-hidden="true"><i></i></div>
+  <div class="tip" id="tip" role="tooltip"></div>
+</header>
+
+<script>
+(function(){
+'use strict';
+document.documentElement.classList.add('js');
+
+var NS='http://www.w3.org/2000/svg', W=1200, H=280;
+var $=function(s,r){return (r||document).querySelector(s)};
+var root=$('#hero'), svg=$('#scene'), tip=$('#tip'), railEl=$('#rail');
+var gFar=$('#far'), gMid=$('#mid'), gNear=$('#near');
+var gRoads=$('#roads'), gBlds=$('#blds'), gLinks=$('#links'), gNodes=$('#nodes'),
+    gSignals=$('#signals'), gParticles=$('#particles'), gPings=$('#pings');
+var mqReduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+var reduced=mqReduce.matches;
+
+function el(tag,attrs,parent){
+  var n=document.createElementNS(NS,tag);
+  for(var k in attrs) n.setAttribute(k,attrs[k]);
+  if(parent) parent.appendChild(n);
+  return n;
+}
+/* Seeded PRNG ώστε η πόλη να είναι πάντα ίδια */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var rand=mulberry(20261018);
+
+/* ───────── City grid ───────── */
+var xs=[], ys=[-36,22,76,132,188,242,296,330];
+(function(){var x=-70;while(x<W+90){xs.push(Math.round(x));x+=72+rand()*40}})();
+ys=ys.map(function(y){return Math.round(y+(rand()-.5)*6)});
+
+(function drawRoads(){
+  var minor='',major='';
+  xs.forEach(function(x,i){var d='M'+x+' -80V380'; if(i%3===1) major+=d; else minor+=d;});
+  ys.forEach(function(y,j){var d='M-120 '+y+'H1320'; if(j===2||j===4) major+=d; else minor+=d;});
+  var a=el('path',{d:minor,class:'road fx',style:'--d:0ms'},gRoads);
+  var b=el('path',{d:major,class:'road major fx',style:'--d:150ms'},gRoads);
+})();
+
+(function drawBuildings(){
+  for(var j=0;j<ys.length-1;j++){
+    for(var i=0;i<xs.length-1;i++){
+      var cx=xs[i]+6, cw=xs[i+1]-xs[i]-12, cy=ys[j]+6, ch=ys[j+1]-ys[j]-12;
+      if(cx+cw<-30||cx>W+30) continue;
+      var r=rand();
+      var delay=Math.round(150+Math.max(0,Math.min(1,cx/W))*850);
+      if(r<.09){
+        var pk=el('g',{class:'bld fx',style:'--d:'+delay+'ms'},gBlds);
+        el('rect',{x:cx,y:cy,width:cw,height:ch,rx:5,class:'park'},pk);
+        for(var q=0;q<4;q++) el('circle',{cx:(cx+8+rand()*(cw-16)).toFixed(1),cy:(cy+8+rand()*(ch-16)).toFixed(1),r:1.1,class:'park-dot'},pk);
+        continue;
+      }
+      var n=r<.45?1:(r<.85?2:3), gap=4, bw=(cw-gap*(n-1))/n;
+      for(var k=0;k<n;k++){
+        var bx=cx+k*(bw+gap);
+        var e=Math.min(4+rand()*20,ch*.5);
+        var y0=cy+e+rand()*(ch-e-12)*.3;
+        var h0=cy+ch-y0-rand()*3;
+        var br=.55+.7*Math.max(0,Math.min(1,bx/W));
+        var a=(.06+e/24*.12)*br;
+        var verified=rand()<.07;
+        var g=el('g',{class:'bld fx',style:'--d:'+(delay+k*40)+'ms'},gBlds);
+        el('rect',{x:bx.toFixed(1),y:(y0+h0-e).toFixed(1),width:bw.toFixed(1),height:e.toFixed(1),fill:'rgba(30,70,160,'+(a*1.7).toFixed(3)+')'},g);
+        el('rect',{x:bx.toFixed(1),y:(y0-e).toFixed(1),width:bw.toFixed(1),height:h0.toFixed(1),
+          fill:'rgba(130,180,255,'+a.toFixed(3)+')',
+          stroke:verified?'rgba(70,211,154,.75)':'rgba(150,200,255,'+Math.min(.5,a*2.4).toFixed(3)+')',
+          'stroke-width':verified?'1':'.6'},g);
+      }
+    }
+  }
+})();
+
+/* ───────── Accessibility network ───────── */
+var cand=[];
+xs.forEach(function(x){ys.forEach(function(y){ if(x>40&&x<W-20&&y>10&&y<H-10) cand.push({x:x,y:y}); });});
+var nodes=[], N=28, guard=0, minD=74;
+while(nodes.length<N && guard++<6000){
+  if(guard===3000) minD=56;
+  var c=cand[Math.floor(rand()*cand.length)];
+  if(rand()>Math.pow(c.x/W,1.4)+.06) continue;
+  if(nodes.some(function(n){return Math.abs(n.x-c.x)+Math.abs(n.y-c.y)<minD})) continue;
+  var t=rand();
+  nodes.push({x:c.x,y:c.y,type:t<.12?1:(t<.42?2:0),links:[]});
+}
+var LABELS=['Προσβάσιμη τοποθεσία','Επαληθευμένο σημείο','Πρόσβαση χωρίς εμπόδια'];
+var focusable={};[2,6,10,14,18,23].forEach(function(i){focusable[i]=true});
+
+var links=[], seen={};
+nodes.forEach(function(a,ia){
+  var near=nodes.map(function(b,ib){return {ib:ib,d:Math.abs(a.x-b.x)+Math.abs(a.y-b.y)}})
+    .filter(function(o){return o.ib!==ia}).sort(function(p,q){return p.d-q.d}).slice(0,2);
+  near.forEach(function(o){
+    if(o.d>340) return;
+    var key=Math.min(ia,o.ib)+'-'+Math.max(ia,o.ib);
+    if(seen[key]) return; seen[key]=1;
+    var A=nodes[Math.min(ia,o.ib)], B=nodes[Math.max(ia,o.ib)];
+    var mx,my;
+    if(A.x===B.x||A.y===B.y){mx=B.x;my=B.y}
+    else if(rand()<.5){mx=B.x;my=A.y} else {mx=A.x;my=B.y}
+    var L={a:Math.min(ia,o.ib),b:Math.max(ia,o.ib),x0:A.x,y0:A.y,mx:mx,my:my,x1:B.x,y1:B.y};
+    L.l1=Math.abs(mx-A.x)+Math.abs(my-A.y);
+    L.len=Math.abs(B.x-A.x)+Math.abs(B.y-A.y);
+    L.path=el('path',{d:'M'+A.x+' '+A.y+'L'+mx+' '+my+'L'+B.x+' '+B.y,class:'link',pathLength:1,style:'--d:'+(900+links.length*45)+'ms'},gLinks);
+    links.push(L); nodes[L.a].links.push(L); nodes[L.b].links.push(L);
+  });
+});
+
+nodes.forEach(function(n,i){
+  var label=LABELS[n.type], inter=!!focusable[i];
+  var out=el('g',{transform:'translate('+n.x+' '+n.y+')',class:'node-out type'+n.type,'data-label':label,'data-type':n.type},gNodes);
+  if(inter){out.setAttribute('tabindex','0');out.setAttribute('role','img');out.setAttribute('aria-label',label)}
+  else out.setAttribute('aria-hidden','true');
+  var inn=el('g',{class:'node-in',style:'--d:'+(700+i*40)+'ms;--pd:'+(-rand()*3.8).toFixed(2)+'s'},out);
+  el('circle',{r:9,class:'halo'},inn);
+  el('circle',{r:4,class:'ring'},inn);
+  el('circle',{r:2.7+rand()*.8,class:'core'},inn);
+  el('circle',{r:13,class:'hit'},out);
+});
+
+/* Signals που ταξιδεύουν πάνω στις συνδέσεις */
+function pointOn(L,d){
+  if(d<=L.l1){var r=L.l1?d/L.l1:0;return [L.x0+(L.mx-L.x0)*r,L.y0+(L.my-L.y0)*r]}
+  var l2=L.len-L.l1, r2=l2?(d-L.l1)/l2:1;
+  return [L.mx+(L.x1-L.mx)*r2,L.my+(L.y1-L.my)*r2];
+}
+var signals=[];
+(function(){
+  if(!links.length) return;
+  for(var i=0;i<14;i++){
+    var L=links[Math.floor(rand()*links.length)];
+    var s={link:L,from:rand()<.5?L.a:L.b,len:L.len,p:rand()*L.len,v:55+rand()*60};
+    s.g=el('g',{},gSignals);
+    el('circle',{r:5.5,class:'sig-halo'},s.g);
+    el('circle',{r:1.8,class:'sig-core'},s.g);
+    signals.push(s); placeSignal(s);
+  }
+})();
+function placeSignal(s){
+  var L=s.link, d=(s.from===L.a)?s.p:L.len-s.p, pt=pointOn(L,Math.max(0,Math.min(L.len,d)));
+  s.g.setAttribute('transform','translate('+pt[0].toFixed(1)+' '+pt[1].toFixed(1)+')');
+}
+function advanceSignal(s,dt){
+  s.p+=s.v*dt;
+  var guard=0;
+  while(s.p>=s.len && guard++<4){
+    var L=s.link, arrive=(s.from===L.a)?L.b:L.a;
+    var opts=nodes[arrive].links.filter(function(l){return l!==L});
+    if(!opts.length) opts=nodes[arrive].links;
+    var nl=opts[Math.floor(Math.random()*opts.length)];
+    s.p-=s.len; s.from=arrive; s.link=nl; s.len=nl.len;
+  }
+  placeSignal(s);
+}
+
+/* Data particles: ρέουν προς τα δεξιά και κάτω, προς τα στατιστικά */
+var particles=[];
+for(var pi=0;pi<16;pi++){
+  var pg=el('g',{opacity:0},gParticles);
+  particles.push({g:pg,ln:el('line',{class:'p-streak'},pg),c:el('circle',{r:1.5,class:'p-dot'},pg),on:false});
+}
+function spawnParticle(){
+  var p=null; for(var i=0;i<particles.length;i++){if(!particles[i].on){p=particles[i];break}}
+  if(!p||!nodes.length) return;
+  var n=nodes[Math.floor(Math.random()*nodes.length)];
+  p.x0=n.x; p.y0=n.y; p.x2=Math.min(1230,Math.max(n.x+80,880+Math.random()*350)); p.y2=H+14;
+  p.t=0; p.dur=2.2+Math.random()*1.6; p.on=true;
+}
+function bez(p,u,o){var v=1-u;o.x=v*v*p.x0+2*v*u*p.x2+u*u*p.x2;o.y=v*v*p.y0+2*v*u*p.y0+u*u*p.y2}
+var _a={x:0,y:0},_b={x:0,y:0}, railLevel=0;
+function stepParticle(p,dt){
+  p.t+=dt/p.dur;
+  if(p.t>=1){p.on=false;p.g.setAttribute('opacity',0);railLevel=Math.min(1,railLevel+.3);return}
+  var u=Math.pow(p.t,1.5);
+  bez(p,u,_a); bez(p,Math.max(0,u-.07),_b);
+  p.c.setAttribute('cx',_a.x.toFixed(1));p.c.setAttribute('cy',_a.y.toFixed(1));
+  p.ln.setAttribute('x1',_b.x.toFixed(1));p.ln.setAttribute('y1',_b.y.toFixed(1));
+  p.ln.setAttribute('x2',_a.x.toFixed(1));p.ln.setAttribute('y2',_a.y.toFixed(1));
+  var o=Math.min(1,p.t*4)*(p.t>.92?(1-p.t)/.08:1);
+  p.g.setAttribute('opacity',o.toFixed(2));
+}
+
+/* Διακριτικές ενδείξεις «νέων σημείων» (καθαρά διακοσμητικές) */
+function ping(){
+  for(var tries=0;tries<20;tries++){
+    var c=cand[Math.floor(Math.random()*cand.length)];
+    if(Math.random()>Math.pow(c.x/W,1.2)+.05) continue;
+    if(nodes.some(function(n){return n.x===c.x&&n.y===c.y})) continue;
+    var g=el('g',{transform:'translate('+c.x+' '+c.y+')'},gPings);
+    el('circle',{r:3,class:'ping-ring'},g); el('circle',{r:2.2,class:'ping-dot'},g);
+    setTimeout(function(g){return function(){if(g.parentNode)g.parentNode.removeChild(g)}}(g),2600);
+    return;
+  }
+}
+
+/* ───────── Tooltips ───────── */
+var activeTip=null, tipTimer=0;
+function placeTip(n){
+  var r=n.getBoundingClientRect(), h=root.getBoundingClientRect();
+  var tw=tip.offsetWidth, th=tip.offsetHeight;
+  var x=r.left-h.left+r.width/2-tw/2; x=Math.max(8,Math.min(h.width-tw-8,x));
+  var y=r.top-h.top-th-6; if(y<6) y=r.bottom-h.top+6;
+  tip.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+}
+function showTip(n){
+  if(activeTip&&activeTip!==n) activeTip.removeAttribute('aria-describedby');
+  activeTip=n; tip.textContent=n.getAttribute('data-label'); tip.setAttribute('data-type',n.getAttribute('data-type'));
+  n.setAttribute('aria-describedby','tip'); placeTip(n); tip.classList.add('on');
+}
+function hideTip(){
+  if(activeTip) activeTip.removeAttribute('aria-describedby');
+  activeTip=null; tip.classList.remove('on'); clearTimeout(tipTimer);
+}
+function nodeOf(t){return t&&t.closest?t.closest('.node-out'):null}
+svg.addEventListener('pointerover',function(e){if(e.pointerType!=='mouse')return;var n=nodeOf(e.target);if(n)showTip(n)});
+svg.addEventListener('pointerout',function(e){if(e.pointerType!=='mouse')return;var n=nodeOf(e.target);if(n&&!n.contains(e.relatedTarget))hideTip()});
+svg.addEventListener('focusin',function(e){var n=nodeOf(e.target);if(n)showTip(n)});
+svg.addEventListener('focusout',hideTip);
+document.addEventListener('click',function(e){
+  var n=nodeOf(e.target);
+  if(!n){hideTip();return}
+  if(e.pointerType==='mouse') return;            /* στο desktop αρκεί το hover */
+  if(activeTip===n){hideTip();return}
+  showTip(n); clearTimeout(tipTimer); tipTimer=setTimeout(hideTip,3500);
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')hideTip()});
+
+/* ───────── Parallax (ποντίκι + ορατότητα στο viewport) ───────── */
+var tx=0,ty=0,px=0,py=0,vis=1,vs=1,lastMx=-1,lastMy=-1;
+root.addEventListener('pointermove',function(e){
+  if(e.pointerType!=='mouse'||reduced) return;
+  var r=root.getBoundingClientRect();
+  tx=(e.clientX-r.left)/r.width-.5; ty=(e.clientY-r.top)/r.height-.5;
+});
+root.addEventListener('pointerleave',function(){tx=0;ty=0});
+function shift(g,x,y){g.setAttribute('transform','translate('+x.toFixed(2)+' '+y.toFixed(2)+')')}
+
+/* ───────── Loop ───────── */
+var started=false, inView=false, ioFired=false, running=false, raf=0, last=0, spawnT=.4, pingT=1.6;
+function tick(now){
+  raf=0; if(!running) return;
+  var dt=Math.min(.05,(now-last)/1000)||.016; last=now;
+  var k=Math.min(1,dt*4.5);
+  px+=(tx-px)*k; py+=(ty-py)*k; vs+=(vis-vs)*Math.min(1,dt*5);
+  var d=1-vs;
+  shift(gFar,-px*5,-py*3+d*4); shift(gMid,-px*10,-py*6+d*9); shift(gNear,-px*17,-py*10+d*16);
+  if(Math.abs(px-lastMx)>.003||Math.abs(py-lastMy)>.003){
+    lastMx=px;lastMy=py;
+    root.style.setProperty('--mx',(px+.5).toFixed(3)); root.style.setProperty('--my',(py+.5).toFixed(3));
+  }
+  for(var i=0;i<signals.length;i++) advanceSignal(signals[i],dt);
+  spawnT-=dt; if(spawnT<=0){spawnParticle();spawnT=.28+Math.random()*.5}
+  for(var j=0;j<particles.length;j++) if(particles[j].on) stepParticle(particles[j],dt);
+  pingT-=dt; if(pingT<=0){ping();pingT=2.6+Math.random()*2.4}
+  railLevel*=Math.exp(-dt*2.2); railEl.style.opacity=(.45+.55*railLevel).toFixed(2);
+  if(activeTip) placeTip(activeTip);
+  raf=requestAnimationFrame(tick);
+}
+function update(){
+  var want=started&&inView&&!document.hidden&&!reduced;
+  root.classList.toggle('paused',!(inView&&!document.hidden));
+  if(want===running) return;
+  running=want;
+  if(running){last=performance.now();if(!raf)raf=requestAnimationFrame(tick)}
+  else if(raf){cancelAnimationFrame(raf);raf=0}
+}
+function start(){
+  if(started) return; started=true;
+  root.classList.add('is-in');
+  update();
+}
+document.addEventListener('visibilitychange',update);
+window.addEventListener('pagehide',function(){running=false;if(raf)cancelAnimationFrame(raf)});
+function onReduce(){reduced=mqReduce.matches;if(reduced){shift(gFar,0,0);shift(gMid,0,0);shift(gNear,0,0)}update()}
+if(mqReduce.addEventListener) mqReduce.addEventListener('change',onReduce); else if(mqReduce.addListener) mqReduce.addListener(onReduce);
+
+/* IntersectionObserver μέσα στο iframe + ασφαλές fallback στη φόρτωση */
+if('IntersectionObserver' in window){
+  var th=[];for(var q=0;q<=20;q++) th.push(q/20);
+  new IntersectionObserver(function(es){
+    var e=es[es.length-1]; ioFired=true;
+    inView=e.isIntersecting; vis=e.intersectionRatio;
+    if(inView&&vis>=.2) start();
+    update();
+  },{threshold:th}).observe(root);
+}
+setTimeout(function(){
+  if(!ioFired){inView=true;vis=1}
+  start(); update();
+},1600);
+if(!('IntersectionObserver' in window)){inView=true;vis=1}
+
+})();
+</script>
+<noscript><style>.rv,.fx,.node-in,.link{opacity:1!important;transform:none!important;stroke-dashoffset:0!important}</style></noscript>
+</body>
+</html>
